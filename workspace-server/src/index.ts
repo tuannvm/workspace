@@ -25,6 +25,30 @@ import { setLoggingEnabled } from './utils/logger';
 import { applyToolNameNormalization } from './utils/tool-normalization';
 import { SCOPES } from './auth/scopes';
 
+// Shared schemas for calendar event tools
+const eventMeetAndAttachmentsSchema = {
+  addGoogleMeet: z
+    .boolean()
+    .optional()
+    .describe('Whether to create a Google Meet link for the event.'),
+  attachments: z
+    .array(
+      z.object({
+        fileUrl: z.string().describe('Google Drive file URL.'),
+        title: z
+          .string()
+          .optional()
+          .describe('Display title for the attachment.'),
+        mimeType: z
+          .string()
+          .optional()
+          .describe('MIME type of the attachment.'),
+      }),
+    )
+    .optional()
+    .describe('Google Drive file attachments.'),
+};
+
 // Shared schemas for Gmail tools
 const emailComposeSchema = {
   to: z
@@ -654,6 +678,7 @@ async function main() {
           .describe(
             'Whether to send notifications to attendees. Defaults to "all" if attendees are provided, otherwise "none".',
           ),
+        ...eventMeetAndAttachmentsSchema,
       },
     },
     calendarService.createEvent,
@@ -772,6 +797,7 @@ async function main() {
           .array(z.string())
           .optional()
           .describe('The new list of attendees for the event.'),
+        ...eventMeetAndAttachmentsSchema,
       },
     },
     calendarService.updateEvent,
