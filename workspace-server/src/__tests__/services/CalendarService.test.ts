@@ -1306,7 +1306,7 @@ describe('CalendarService', () => {
     });
   });
 
-  describe('createEvent with Google Meet', () => {
+  describe('events with Google Meet and attachments', () => {
     beforeEach(async () => {
       mockCalendarAPI.calendarList.list.mockResolvedValue({
         data: {
@@ -1315,242 +1315,220 @@ describe('CalendarService', () => {
       });
     });
 
-    it('should create an event with a Google Meet link', async () => {
-      const mockCreatedEvent = {
-        id: 'event123',
-        summary: 'Meeting with Meet',
-        conferenceData: {
-          conferenceId: 'meet-id',
-          entryPoints: [{ uri: 'https://meet.google.com/abc-defg-hij' }],
-        },
-      };
+    describe('createEvent with Google Meet', () => {
+      it('should create an event with a Google Meet link', async () => {
+        const mockCreatedEvent = {
+          id: 'event123',
+          summary: 'Meeting with Meet',
+          conferenceData: {
+            conferenceId: 'meet-id',
+            entryPoints: [{ uri: 'https://meet.google.com/abc-defg-hij' }],
+          },
+        };
 
-      mockCalendarAPI.events.insert.mockResolvedValue({
-        data: mockCreatedEvent,
-      });
+        mockCalendarAPI.events.insert.mockResolvedValue({
+          data: mockCreatedEvent,
+        });
 
-      const result = await calendarService.createEvent({
-        calendarId: 'primary',
-        summary: 'Meeting with Meet',
-        start: { dateTime: '2024-01-15T10:00:00-07:00' },
-        end: { dateTime: '2024-01-15T11:00:00-07:00' },
-        addGoogleMeet: true,
-      });
-
-      expect(mockCalendarAPI.events.insert).toHaveBeenCalledWith(
-        expect.objectContaining({
+        const result = await calendarService.createEvent({
           calendarId: 'primary',
-          conferenceDataVersion: 1,
-          requestBody: expect.objectContaining({
-            summary: 'Meeting with Meet',
-            conferenceData: expect.objectContaining({
-              createRequest: expect.objectContaining({
-                conferenceSolutionKey: { type: 'hangoutsMeet' },
+          summary: 'Meeting with Meet',
+          start: { dateTime: '2024-01-15T10:00:00-07:00' },
+          end: { dateTime: '2024-01-15T11:00:00-07:00' },
+          addGoogleMeet: true,
+        });
+
+        expect(mockCalendarAPI.events.insert).toHaveBeenCalledWith(
+          expect.objectContaining({
+            calendarId: 'primary',
+            conferenceDataVersion: 1,
+            requestBody: expect.objectContaining({
+              summary: 'Meeting with Meet',
+              conferenceData: expect.objectContaining({
+                createRequest: expect.objectContaining({
+                  conferenceSolutionKey: { type: 'hangoutsMeet' },
+                }),
               }),
             }),
           }),
-        }),
-      );
+        );
 
-      expect(JSON.parse(result.content[0].text)).toEqual(mockCreatedEvent);
-    });
-
-    it('should not include conferenceData when addGoogleMeet is false', async () => {
-      const mockCreatedEvent = { id: 'event123', summary: 'No Meet' };
-      mockCalendarAPI.events.insert.mockResolvedValue({
-        data: mockCreatedEvent,
+        expect(JSON.parse(result.content[0].text)).toEqual(mockCreatedEvent);
       });
 
-      await calendarService.createEvent({
-        calendarId: 'primary',
-        summary: 'No Meet',
-        start: { dateTime: '2024-01-15T10:00:00-07:00' },
-        end: { dateTime: '2024-01-15T11:00:00-07:00' },
-        addGoogleMeet: false,
-      });
+      it('should not include conferenceData when addGoogleMeet is false', async () => {
+        const mockCreatedEvent = { id: 'event123', summary: 'No Meet' };
+        mockCalendarAPI.events.insert.mockResolvedValue({
+          data: mockCreatedEvent,
+        });
 
-      const callArgs = mockCalendarAPI.events.insert.mock.calls[0][0];
-      expect(callArgs.conferenceDataVersion).toBeUndefined();
-      expect(callArgs.requestBody.conferenceData).toBeUndefined();
-    });
-  });
+        await calendarService.createEvent({
+          calendarId: 'primary',
+          summary: 'No Meet',
+          start: { dateTime: '2024-01-15T10:00:00-07:00' },
+          end: { dateTime: '2024-01-15T11:00:00-07:00' },
+          addGoogleMeet: false,
+        });
 
-  describe('createEvent with attachments', () => {
-    beforeEach(async () => {
-      mockCalendarAPI.calendarList.list.mockResolvedValue({
-        data: {
-          items: [{ id: 'primary', primary: true }],
-        },
+        const callArgs = mockCalendarAPI.events.insert.mock.calls[0][0];
+        expect(callArgs.conferenceDataVersion).toBeUndefined();
+        expect(callArgs.requestBody.conferenceData).toBeUndefined();
       });
     });
 
-    it('should create an event with file attachments', async () => {
-      const mockCreatedEvent = {
-        id: 'event123',
-        summary: 'Meeting with Docs',
-        attachments: [
-          {
-            fileUrl: 'https://drive.google.com/open?id=file123',
-            title: 'Agenda',
-          },
-        ],
-      };
+    describe('createEvent with attachments', () => {
+      it('should create an event with file attachments', async () => {
+        const mockCreatedEvent = {
+          id: 'event123',
+          summary: 'Meeting with Docs',
+          attachments: [
+            {
+              fileUrl: 'https://drive.google.com/open?id=file123',
+              title: 'Agenda',
+            },
+          ],
+        };
 
-      mockCalendarAPI.events.insert.mockResolvedValue({
-        data: mockCreatedEvent,
-      });
+        mockCalendarAPI.events.insert.mockResolvedValue({
+          data: mockCreatedEvent,
+        });
 
-      const result = await calendarService.createEvent({
-        calendarId: 'primary',
-        summary: 'Meeting with Docs',
-        start: { dateTime: '2024-01-15T10:00:00-07:00' },
-        end: { dateTime: '2024-01-15T11:00:00-07:00' },
-        attachments: [
-          {
-            fileUrl: 'https://drive.google.com/open?id=file123',
-            title: 'Agenda',
-            mimeType: 'application/vnd.google-apps.document',
-          },
-        ],
-      });
+        const result = await calendarService.createEvent({
+          calendarId: 'primary',
+          summary: 'Meeting with Docs',
+          start: { dateTime: '2024-01-15T10:00:00-07:00' },
+          end: { dateTime: '2024-01-15T11:00:00-07:00' },
+          attachments: [
+            {
+              fileUrl: 'https://drive.google.com/open?id=file123',
+              title: 'Agenda',
+              mimeType: 'application/vnd.google-apps.document',
+            },
+          ],
+        });
 
-      expect(mockCalendarAPI.events.insert).toHaveBeenCalledWith(
-        expect.objectContaining({
-          supportsAttachments: true,
-          requestBody: expect.objectContaining({
-            attachments: [
-              {
-                fileUrl: 'https://drive.google.com/open?id=file123',
-                title: 'Agenda',
-                mimeType: 'application/vnd.google-apps.document',
-              },
-            ],
+        expect(mockCalendarAPI.events.insert).toHaveBeenCalledWith(
+          expect.objectContaining({
+            supportsAttachments: true,
+            requestBody: expect.objectContaining({
+              attachments: [
+                {
+                  fileUrl: 'https://drive.google.com/open?id=file123',
+                  title: 'Agenda',
+                  mimeType: 'application/vnd.google-apps.document',
+                },
+              ],
+            }),
           }),
-        }),
-      );
+        );
 
-      expect(JSON.parse(result.content[0].text)).toEqual(mockCreatedEvent);
-    });
-
-    it('should create an event with both Google Meet and attachments', async () => {
-      const mockCreatedEvent = { id: 'event123' };
-      mockCalendarAPI.events.insert.mockResolvedValue({
-        data: mockCreatedEvent,
+        expect(JSON.parse(result.content[0].text)).toEqual(mockCreatedEvent);
       });
 
-      await calendarService.createEvent({
-        calendarId: 'primary',
-        summary: 'Full Featured Meeting',
-        start: { dateTime: '2024-01-15T10:00:00-07:00' },
-        end: { dateTime: '2024-01-15T11:00:00-07:00' },
-        addGoogleMeet: true,
-        attachments: [
-          { fileUrl: 'https://drive.google.com/open?id=file123' },
-        ],
-      });
+      it('should create an event with both Google Meet and attachments', async () => {
+        const mockCreatedEvent = { id: 'event123' };
+        mockCalendarAPI.events.insert.mockResolvedValue({
+          data: mockCreatedEvent,
+        });
 
-      const callArgs = mockCalendarAPI.events.insert.mock.calls[0][0];
-      expect(callArgs.conferenceDataVersion).toBe(1);
-      expect(callArgs.supportsAttachments).toBe(true);
-      expect(callArgs.requestBody.conferenceData).toBeDefined();
-      expect(callArgs.requestBody.attachments).toBeDefined();
-    });
-  });
+        await calendarService.createEvent({
+          calendarId: 'primary',
+          summary: 'Full Featured Meeting',
+          start: { dateTime: '2024-01-15T10:00:00-07:00' },
+          end: { dateTime: '2024-01-15T11:00:00-07:00' },
+          addGoogleMeet: true,
+          attachments: [
+            { fileUrl: 'https://drive.google.com/open?id=file123' },
+          ],
+        });
 
-  describe('updateEvent with Google Meet', () => {
-    beforeEach(async () => {
-      mockCalendarAPI.calendarList.list.mockResolvedValue({
-        data: {
-          items: [{ id: 'primary', primary: true }],
-        },
+        const callArgs = mockCalendarAPI.events.insert.mock.calls[0][0];
+        expect(callArgs.conferenceDataVersion).toBe(1);
+        expect(callArgs.supportsAttachments).toBe(true);
+        expect(callArgs.requestBody.conferenceData).toBeDefined();
+        expect(callArgs.requestBody.attachments).toBeDefined();
       });
     });
 
-    it('should add Google Meet to an existing event', async () => {
-      const updatedEvent = {
-        id: 'event123',
-        conferenceData: {
-          conferenceId: 'meet-id',
-          entryPoints: [{ uri: 'https://meet.google.com/abc-defg-hij' }],
-        },
-      };
+    describe('updateEvent with Google Meet', () => {
+      it('should add Google Meet to an existing event', async () => {
+        const updatedEvent = {
+          id: 'event123',
+          conferenceData: {
+            conferenceId: 'meet-id',
+            entryPoints: [{ uri: 'https://meet.google.com/abc-defg-hij' }],
+          },
+        };
 
-      mockCalendarAPI.events.update.mockResolvedValue({ data: updatedEvent });
+        mockCalendarAPI.events.update.mockResolvedValue({ data: updatedEvent });
 
-      const result = await calendarService.updateEvent({
-        eventId: 'event123',
-        addGoogleMeet: true,
+        const result = await calendarService.updateEvent({
+          eventId: 'event123',
+          addGoogleMeet: true,
+        });
+
+        const callArgs = mockCalendarAPI.events.update.mock.calls[0][0];
+        expect(callArgs.conferenceDataVersion).toBe(1);
+        expect(callArgs.requestBody.conferenceData).toBeDefined();
+        expect(
+          callArgs.requestBody.conferenceData.createRequest
+            .conferenceSolutionKey.type,
+        ).toBe('hangoutsMeet');
+
+        expect(JSON.parse(result.content[0].text)).toEqual(updatedEvent);
       });
 
-      const callArgs = mockCalendarAPI.events.update.mock.calls[0][0];
-      expect(callArgs.conferenceDataVersion).toBe(1);
-      expect(callArgs.requestBody.conferenceData).toBeDefined();
-      expect(
-        callArgs.requestBody.conferenceData.createRequest
-          .conferenceSolutionKey.type,
-      ).toBe('hangoutsMeet');
+      it('should not include conferenceData when addGoogleMeet is false', async () => {
+        const updatedEvent = { id: 'event123', summary: 'No Meet' };
+        mockCalendarAPI.events.update.mockResolvedValue({ data: updatedEvent });
 
-      expect(JSON.parse(result.content[0].text)).toEqual(updatedEvent);
-    });
+        await calendarService.updateEvent({
+          eventId: 'event123',
+          summary: 'No Meet',
+          addGoogleMeet: false,
+        });
 
-    it('should not include conferenceData when addGoogleMeet is false', async () => {
-      const updatedEvent = { id: 'event123', summary: 'No Meet' };
-      mockCalendarAPI.events.update.mockResolvedValue({ data: updatedEvent });
-
-      await calendarService.updateEvent({
-        eventId: 'event123',
-        summary: 'No Meet',
-        addGoogleMeet: false,
-      });
-
-      const callArgs = mockCalendarAPI.events.update.mock.calls[0][0];
-      expect(callArgs.conferenceDataVersion).toBeUndefined();
-      expect(callArgs.requestBody.conferenceData).toBeUndefined();
-    });
-  });
-
-  describe('updateEvent with attachments', () => {
-    beforeEach(async () => {
-      mockCalendarAPI.calendarList.list.mockResolvedValue({
-        data: {
-          items: [{ id: 'primary', primary: true }],
-        },
+        const callArgs = mockCalendarAPI.events.update.mock.calls[0][0];
+        expect(callArgs.conferenceDataVersion).toBeUndefined();
+        expect(callArgs.requestBody.conferenceData).toBeUndefined();
       });
     });
 
-    it('should add attachments to an existing event', async () => {
-      const updatedEvent = {
-        id: 'event123',
-        attachments: [
-          {
+    describe('updateEvent with attachments', () => {
+      it('should add attachments to an existing event', async () => {
+        const updatedEvent = {
+          id: 'event123',
+          attachments: [
+            {
+              fileUrl: 'https://drive.google.com/open?id=file123',
+              title: 'Notes',
+            },
+          ],
+        };
+
+        mockCalendarAPI.events.update.mockResolvedValue({ data: updatedEvent });
+
+        const result = await calendarService.updateEvent({
+          eventId: 'event123',
+          attachments: [
+            {
+              fileUrl: 'https://drive.google.com/open?id=file123',
+              title: 'Notes',
+            },
+          ],
+        });
+
+        const callArgs = mockCalendarAPI.events.update.mock.calls[0][0];
+        expect(callArgs.supportsAttachments).toBe(true);
+        expect(callArgs.requestBody.attachments).toEqual([
+          expect.objectContaining({
             fileUrl: 'https://drive.google.com/open?id=file123',
             title: 'Notes',
-          },
-        ],
-      };
+          }),
+        ]);
 
-      mockCalendarAPI.events.update.mockResolvedValue({ data: updatedEvent });
-
-      const result = await calendarService.updateEvent({
-        eventId: 'event123',
-        attachments: [
-          {
-            fileUrl: 'https://drive.google.com/open?id=file123',
-            title: 'Notes',
-          },
-        ],
+        expect(JSON.parse(result.content[0].text)).toEqual(updatedEvent);
       });
-
-      const callArgs = mockCalendarAPI.events.update.mock.calls[0][0];
-      expect(callArgs.supportsAttachments).toBe(true);
-      expect(callArgs.requestBody.attachments).toEqual([
-        expect.objectContaining({
-          fileUrl: 'https://drive.google.com/open?id=file123',
-          title: 'Notes',
-        }),
-      ]);
-
-      expect(JSON.parse(result.content[0].text)).toEqual(updatedEvent);
     });
   });
 });

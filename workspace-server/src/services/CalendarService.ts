@@ -4,6 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import crypto from 'node:crypto';
 import { calendar_v3, google } from 'googleapis';
 import { logToFile } from '../utils/logger';
 import { gaxiosOptions } from '../utils/GaxiosConfig';
@@ -87,7 +88,7 @@ export class CalendarService {
     if (addGoogleMeet) {
       event.conferenceData = {
         createRequest: {
-          requestId: `${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
+          requestId: crypto.randomUUID(),
           conferenceSolutionKey: { type: 'hangoutsMeet' },
         },
       };
