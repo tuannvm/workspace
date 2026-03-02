@@ -81,7 +81,7 @@ const SCOPES = [
   'https://www.googleapis.com/auth/gmail.modify',
   'https://www.googleapis.com/auth/directory.readonly',
   'https://www.googleapis.com/auth/presentations.readonly',
-  'https://www.googleapis.com/auth/spreadsheets.readonly',
+  'https://www.googleapis.com/auth/spreadsheets',
 ];
 
 // Dynamically import version from package.json
@@ -521,6 +521,134 @@ async function main() {
       ...readOnlyToolProps,
     },
     sheetsService.getMetadata,
+  );
+
+  server.registerTool(
+    'sheets.updateRange',
+    {
+      description:
+        'Writes values to a specific range in a Google Sheets spreadsheet.',
+      inputSchema: {
+        spreadsheetId: z.string().describe('The ID or URL of the spreadsheet.'),
+        range: z
+          .string()
+          .describe(
+            'The A1 notation range to write to (e.g., "Sheet1!A1:B2").',
+          ),
+        values: z
+          .array(
+            z.array(
+              z.union([z.string(), z.number(), z.boolean(), z.null()]),
+            ),
+          )
+          .describe(
+            'The values to write, as a 2D array (rows x columns). Supports strings, numbers, booleans, and null.',
+          ),
+        valueInputOption: z
+          .enum(['RAW', 'USER_ENTERED'])
+          .optional()
+          .describe(
+            'How to interpret the input values. RAW: values are stored as-is. USER_ENTERED: values are parsed as if typed into the UI (default: USER_ENTERED).',
+          ),
+      },
+    },
+    sheetsService.updateRange,
+  );
+
+  server.registerTool(
+    'sheets.appendRange',
+    {
+      description:
+        'Appends rows of values after the last row with data in a Google Sheets spreadsheet.',
+      inputSchema: {
+        spreadsheetId: z.string().describe('The ID or URL of the spreadsheet.'),
+        range: z
+          .string()
+          .describe(
+            'The A1 notation range to search for data to append after (e.g., "Sheet1!A:E").',
+          ),
+        values: z
+          .array(
+            z.array(
+              z.union([z.string(), z.number(), z.boolean(), z.null()]),
+            ),
+          )
+          .describe(
+            'The rows to append, as a 2D array. Supports strings, numbers, booleans, and null.',
+          ),
+        valueInputOption: z
+          .enum(['RAW', 'USER_ENTERED'])
+          .optional()
+          .describe(
+            'How to interpret the input values. RAW: values are stored as-is. USER_ENTERED: values are parsed as if typed into the UI (default: USER_ENTERED).',
+          ),
+      },
+    },
+    sheetsService.appendRange,
+  );
+
+  server.registerTool(
+    'sheets.clearRange',
+    {
+      description:
+        'Clears all values from a specific range in a Google Sheets spreadsheet.',
+      inputSchema: {
+        spreadsheetId: z.string().describe('The ID or URL of the spreadsheet.'),
+        range: z
+          .string()
+          .describe(
+            'The A1 notation range to clear (e.g., "Sheet1!A1:B2").',
+          ),
+      },
+    },
+    sheetsService.clearRange,
+  );
+
+  server.registerTool(
+    'sheets.createSpreadsheet',
+    {
+      description: 'Creates a new Google Sheets spreadsheet.',
+      inputSchema: {
+        title: z.string().describe('The title of the new spreadsheet.'),
+        sheetTitles: z
+          .array(z.string())
+          .optional()
+          .describe(
+            'Optional list of sheet/tab names to create. Defaults to a single "Sheet1" tab.',
+          ),
+      },
+    },
+    sheetsService.createSpreadsheet,
+  );
+
+  server.registerTool(
+    'sheets.addSheet',
+    {
+      description:
+        'Adds a new sheet (tab) to an existing Google Sheets spreadsheet.',
+      inputSchema: {
+        spreadsheetId: z.string().describe('The ID or URL of the spreadsheet.'),
+        title: z.string().describe('The title of the new sheet/tab.'),
+      },
+    },
+    sheetsService.addSheet,
+  );
+
+  server.registerTool(
+    'sheets.deleteSheet',
+    {
+      description:
+        'Deletes a sheet (tab) from a Google Sheets spreadsheet by its numeric sheet ID.',
+      inputSchema: {
+        spreadsheetId: z.string().describe('The ID or URL of the spreadsheet.'),
+        sheetId: z
+          .number()
+          .describe(
+            'The numeric ID of the sheet to delete. Use sheets.getMetadata to find sheet IDs.',
+          ),
+      },
+    },
+    sheetsService.deleteSheet,
   );
 
   server.registerTool(

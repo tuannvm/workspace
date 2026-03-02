@@ -258,6 +258,325 @@ export class SheetsService {
     }
   };
 
+  public updateRange = async ({
+    spreadsheetId,
+    range,
+    values,
+    valueInputOption = 'USER_ENTERED',
+  }: {
+    spreadsheetId: string;
+    range: string;
+    values: (string | number | boolean | null)[][];
+    valueInputOption?: 'RAW' | 'USER_ENTERED';
+  }) => {
+    logToFile(
+      `[SheetsService] Starting updateRange for spreadsheet: ${spreadsheetId}, range: ${range}`,
+    );
+    try {
+      const id = extractDocId(spreadsheetId) || spreadsheetId;
+
+      const sheets = await this.getSheetsClient();
+      const response = await sheets.spreadsheets.values.update({
+        spreadsheetId: id,
+        range,
+        valueInputOption,
+        requestBody: { values },
+      });
+
+      logToFile(`[SheetsService] Finished updateRange for spreadsheet: ${id}`);
+      return {
+        content: [
+          {
+            type: 'text' as const,
+            text: JSON.stringify({
+              updatedRange: response.data.updatedRange,
+              updatedRows: response.data.updatedRows,
+              updatedColumns: response.data.updatedColumns,
+              updatedCells: response.data.updatedCells,
+            }),
+          },
+        ],
+      };
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : String(error);
+      logToFile(
+        `[SheetsService] Error during sheets.updateRange: ${errorMessage}`,
+      );
+      return {
+        content: [
+          {
+            type: 'text' as const,
+            text: JSON.stringify({ error: errorMessage }),
+          },
+        ],
+      };
+    }
+  };
+
+  public appendRange = async ({
+    spreadsheetId,
+    range,
+    values,
+    valueInputOption = 'USER_ENTERED',
+  }: {
+    spreadsheetId: string;
+    range: string;
+    values: (string | number | boolean | null)[][];
+    valueInputOption?: 'RAW' | 'USER_ENTERED';
+  }) => {
+    logToFile(
+      `[SheetsService] Starting appendRange for spreadsheet: ${spreadsheetId}, range: ${range}`,
+    );
+    try {
+      const id = extractDocId(spreadsheetId) || spreadsheetId;
+
+      const sheets = await this.getSheetsClient();
+      const response = await sheets.spreadsheets.values.append({
+        spreadsheetId: id,
+        range,
+        valueInputOption,
+        insertDataOption: 'INSERT_ROWS',
+        requestBody: { values },
+      });
+
+      logToFile(`[SheetsService] Finished appendRange for spreadsheet: ${id}`);
+      return {
+        content: [
+          {
+            type: 'text' as const,
+            text: JSON.stringify({
+              updates: {
+                updatedRange: response.data.updates?.updatedRange,
+                updatedRows: response.data.updates?.updatedRows,
+                updatedColumns: response.data.updates?.updatedColumns,
+                updatedCells: response.data.updates?.updatedCells,
+              },
+            }),
+          },
+        ],
+      };
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : String(error);
+      logToFile(
+        `[SheetsService] Error during sheets.appendRange: ${errorMessage}`,
+      );
+      return {
+        content: [
+          {
+            type: 'text' as const,
+            text: JSON.stringify({ error: errorMessage }),
+          },
+        ],
+      };
+    }
+  };
+
+  public clearRange = async ({
+    spreadsheetId,
+    range,
+  }: {
+    spreadsheetId: string;
+    range: string;
+  }) => {
+    logToFile(
+      `[SheetsService] Starting clearRange for spreadsheet: ${spreadsheetId}, range: ${range}`,
+    );
+    try {
+      const id = extractDocId(spreadsheetId) || spreadsheetId;
+
+      const sheets = await this.getSheetsClient();
+      const response = await sheets.spreadsheets.values.clear({
+        spreadsheetId: id,
+        range,
+      });
+
+      logToFile(`[SheetsService] Finished clearRange for spreadsheet: ${id}`);
+      return {
+        content: [
+          {
+            type: 'text' as const,
+            text: JSON.stringify({
+              clearedRange: response.data.clearedRange,
+            }),
+          },
+        ],
+      };
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : String(error);
+      logToFile(
+        `[SheetsService] Error during sheets.clearRange: ${errorMessage}`,
+      );
+      return {
+        content: [
+          {
+            type: 'text' as const,
+            text: JSON.stringify({ error: errorMessage }),
+          },
+        ],
+      };
+    }
+  };
+
+  public createSpreadsheet = async ({
+    title,
+    sheetTitles,
+  }: {
+    title: string;
+    sheetTitles?: string[];
+  }) => {
+    logToFile(
+      `[SheetsService] Starting createSpreadsheet with title: ${title}`,
+    );
+    try {
+      const sheets = await this.getSheetsClient();
+      const response = await sheets.spreadsheets.create({
+        requestBody: {
+          properties: { title },
+          sheets: sheetTitles?.map((t) => ({ properties: { title: t } })),
+        },
+      });
+
+      logToFile(
+        `[SheetsService] Created spreadsheet: ${response.data.spreadsheetId}`,
+      );
+      return {
+        content: [
+          {
+            type: 'text' as const,
+            text: JSON.stringify({
+              spreadsheetId: response.data.spreadsheetId,
+              spreadsheetUrl: response.data.spreadsheetUrl,
+              title: response.data.properties?.title,
+              sheets: response.data.sheets?.map((s) => ({
+                sheetId: s.properties?.sheetId,
+                title: s.properties?.title,
+              })),
+            }),
+          },
+        ],
+      };
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : String(error);
+      logToFile(
+        `[SheetsService] Error during sheets.createSpreadsheet: ${errorMessage}`,
+      );
+      return {
+        content: [
+          {
+            type: 'text' as const,
+            text: JSON.stringify({ error: errorMessage }),
+          },
+        ],
+      };
+    }
+  };
+
+  public addSheet = async ({
+    spreadsheetId,
+    title,
+  }: {
+    spreadsheetId: string;
+    title: string;
+  }) => {
+    logToFile(
+      `[SheetsService] Starting addSheet for spreadsheet: ${spreadsheetId}, title: ${title}`,
+    );
+    try {
+      const id = extractDocId(spreadsheetId) || spreadsheetId;
+
+      const sheets = await this.getSheetsClient();
+      const response = await sheets.spreadsheets.batchUpdate({
+        spreadsheetId: id,
+        requestBody: {
+          requests: [{ addSheet: { properties: { title } } }],
+        },
+      });
+
+      const addedSheet = response.data.replies?.[0]?.addSheet;
+      logToFile(`[SheetsService] Added sheet to spreadsheet: ${id}`);
+      return {
+        content: [
+          {
+            type: 'text' as const,
+            text: JSON.stringify({
+              sheetId: addedSheet?.properties?.sheetId,
+              title: addedSheet?.properties?.title,
+            }),
+          },
+        ],
+      };
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : String(error);
+      logToFile(
+        `[SheetsService] Error during sheets.addSheet: ${errorMessage}`,
+      );
+      return {
+        content: [
+          {
+            type: 'text' as const,
+            text: JSON.stringify({ error: errorMessage }),
+          },
+        ],
+      };
+    }
+  };
+
+  public deleteSheet = async ({
+    spreadsheetId,
+    sheetId,
+  }: {
+    spreadsheetId: string;
+    sheetId: number;
+  }) => {
+    logToFile(
+      `[SheetsService] Starting deleteSheet for spreadsheet: ${spreadsheetId}, sheetId: ${sheetId}`,
+    );
+    try {
+      const id = extractDocId(spreadsheetId) || spreadsheetId;
+
+      const sheets = await this.getSheetsClient();
+      await sheets.spreadsheets.batchUpdate({
+        spreadsheetId: id,
+        requestBody: {
+          requests: [{ deleteSheet: { sheetId } }],
+        },
+      });
+
+      logToFile(
+        `[SheetsService] Deleted sheet ${sheetId} from spreadsheet: ${id}`,
+      );
+      return {
+        content: [
+          {
+            type: 'text' as const,
+            text: JSON.stringify({
+              message: `Successfully deleted sheet ${sheetId}`,
+            }),
+          },
+        ],
+      };
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : String(error);
+      logToFile(
+        `[SheetsService] Error during sheets.deleteSheet: ${errorMessage}`,
+      );
+      return {
+        content: [
+          {
+            type: 'text' as const,
+            text: JSON.stringify({ error: errorMessage }),
+          },
+        ],
+      };
+    }
+  };
+
   public getMetadata = async ({ spreadsheetId }: { spreadsheetId: string }) => {
     logToFile(
       `[SheetsService] Starting getMetadata for spreadsheet: ${spreadsheetId}`,
