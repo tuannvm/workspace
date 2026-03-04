@@ -86,7 +86,8 @@ Should I create this event?
 - **`addGoogleMeet`** — Set to `true` to automatically generate a Google Meet
   link (available in response's `hangoutLink` field)
 - **`attachments`** — Array of Google Drive file attachments (fileUrl, title,
-  optional mimeType). Providing attachments fully replaces any existing attachments.
+  optional mimeType). Providing attachments fully replaces any existing
+  attachments.
 - **`sendUpdates`** — Controls email notifications:
   - `"all"` — Notify all attendees (default when attendees are provided)
   - `"externalOnly"` — Only notify non-organization attendees
@@ -121,7 +122,8 @@ be changed — everything else is preserved.
 - **Adding attendees**: Provide the full attendee list (existing + new)
 - **Changing title/description**: Update `summary` or `description`
 - **Adding Google Meet**: Set `addGoogleMeet: true` to generate a Meet link
-- **Managing attachments**: Provide the full attachment list (replaces all existing)
+- **Managing attachments**: Provide the full attachment list (replaces all
+  existing)
 
 > **Important:** The `attendees` field is a full replacement, not an append. To
 > add a new attendee, include all existing attendees plus the new one. The same
@@ -232,13 +234,13 @@ Users may have multiple calendars (personal, work, shared team calendars).
 
 ## Tool Quick Reference
 
-| Tool                      | Action                      | Key Parameters                                            |
-| :------------------------ | :-------------------------- | :-------------------------------------------------------- |
-| `calendar.list`           | List all calendars          | _(none)_                                                  |
-| `calendar.listEvents`     | List events                 | `calendarId`, `timeMin`, `timeMax`                        |
-| `calendar.getEvent`       | Get event details           | `eventId`, `calendarId`                                 |
-| `calendar.createEvent`    | Create a new event          | `calendarId`, `summary`, `start`, `end`, `addGoogleMeet`, `attachments` |
+| Tool                      | Action                      | Key Parameters                                                                    |
+| :------------------------ | :-------------------------- | :-------------------------------------------------------------------------------- |
+| `calendar.list`           | List all calendars          | _(none)_                                                                          |
+| `calendar.listEvents`     | List events                 | `calendarId`, `timeMin`, `timeMax`                                                |
+| `calendar.getEvent`       | Get event details           | `eventId`, `calendarId`                                                           |
+| `calendar.createEvent`    | Create a new event          | `calendarId`, `summary`, `start`, `end`, `addGoogleMeet`, `attachments`           |
 | `calendar.updateEvent`    | Modify an existing event    | `eventId`, `summary`, `start`, `end`, `attendees`, `addGoogleMeet`, `attachments` |
-| `calendar.deleteEvent`    | Delete an event             | `eventId`, `calendarId`                                 |
-| `calendar.respondToEvent` | Accept/decline an invite    | `eventId`, `responseStatus`                             |
-| `calendar.findFreeTime`   | Find available meeting time | `attendees`, `timeMin`, `timeMax`, `duration`           |
+| `calendar.deleteEvent`    | Delete an event             | `eventId`, `calendarId`                                                           |
+| `calendar.respondToEvent` | Accept/decline an invite    | `eventId`, `responseStatus`                                                       |
+| `calendar.findFreeTime`   | Find available meeting time | `attendees`, `timeMin`, `timeMax`, `duration`                                     |

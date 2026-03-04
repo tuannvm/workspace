@@ -31,7 +31,7 @@ const eventMeetAndAttachmentsSchema = {
     .boolean()
     .optional()
     .describe(
-      'Whether to create a Google Meet link for the event. The Meet URL will be available in the response\'s hangoutLink field.',
+      "Whether to create a Google Meet link for the event. The Meet URL will be available in the response's hangoutLink field.",
     ),
   attachments: z
     .array(
@@ -654,7 +654,7 @@ async function main() {
     'calendar.createEvent',
     {
       description:
-        'Creates a new event in a calendar. Supports optional Google Meet link generation and Google Drive file attachments. When addGoogleMeet is true, the Meet URL will be in the response\'s hangoutLink field. Attachments fully replace any existing attachments.',
+        "Creates a new event in a calendar. Supports optional Google Meet link generation and Google Drive file attachments. When addGoogleMeet is true, the Meet URL will be in the response's hangoutLink field. Attachments fully replace any existing attachments.",
       inputSchema: {
         calendarId: z
           .string()
@@ -771,7 +771,7 @@ async function main() {
     'calendar.updateEvent',
     {
       description:
-        'Updates an existing event in a calendar. Supports adding Google Meet links and Google Drive file attachments. When addGoogleMeet is true, the Meet URL will be in the response\'s hangoutLink field. Attachments fully replace any existing attachments (not appended).',
+        "Updates an existing event in a calendar. Supports adding Google Meet links and Google Drive file attachments. When addGoogleMeet is true, the Meet URL will be in the response's hangoutLink field. Attachments fully replace any existing attachments (not appended).",
       inputSchema: {
         eventId: z.string().describe('The ID of the event to update.'),
         calendarId: z
