@@ -11,7 +11,11 @@ import { gaxiosOptions } from '../utils/GaxiosConfig';
 import { iso8601DateTimeSchema, emailArraySchema } from '../utils/validation';
 import { z } from 'zod';
 
-export interface EventAttachment {
+/**
+ * Google Drive file attachment for calendar events.
+ * Attachments are fully replaced (not appended) when provided.
+ */
+interface EventAttachment {
   fileUrl: string;
   title?: string;
   mimeType?: string;
@@ -78,7 +82,12 @@ export class CalendarService {
 
   constructor(private authManager: any) {}
 
-  /** Adds conferenceData and attachments to an event body and its API params. */
+  /**
+   * Adds conferenceData and attachments to an event body and its API params.
+   *
+   * IMPORTANT: Attachments are fully REPLACED, not appended. When attachments
+   * are provided, any existing attachments on the event will be removed.
+   */
   private applyMeetAndAttachments(
     event: calendar_v3.Schema$Event,
     params: { conferenceDataVersion?: number; supportsAttachments?: boolean },

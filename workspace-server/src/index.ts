@@ -30,11 +30,18 @@ const eventMeetAndAttachmentsSchema = {
   addGoogleMeet: z
     .boolean()
     .optional()
-    .describe('Whether to create a Google Meet link for the event.'),
+    .describe(
+      'Whether to create a Google Meet link for the event. The Meet URL will be available in the response\'s hangoutLink field.',
+    ),
   attachments: z
     .array(
       z.object({
-        fileUrl: z.string().describe('Google Drive file URL.'),
+        fileUrl: z
+          .string()
+          .url()
+          .describe(
+            'Google Drive file URL (e.g., https://drive.google.com/file/d/...)',
+          ),
         title: z
           .string()
           .optional()
@@ -46,7 +53,9 @@ const eventMeetAndAttachmentsSchema = {
       }),
     )
     .optional()
-    .describe('Google Drive file attachments.'),
+    .describe(
+      'Google Drive file attachments. IMPORTANT: Providing attachments fully REPLACES any existing attachments on the event (not appended).',
+    ),
 };
 
 // Shared schemas for Gmail tools
@@ -644,7 +653,8 @@ async function main() {
   server.registerTool(
     'calendar.createEvent',
     {
-      description: 'Creates a new event in a calendar.',
+      description:
+        'Creates a new event in a calendar. Supports optional Google Meet link generation and Google Drive file attachments. When addGoogleMeet is true, the Meet URL will be in the response\'s hangoutLink field. Attachments fully replace any existing attachments.',
       inputSchema: {
         calendarId: z
           .string()
@@ -760,7 +770,8 @@ async function main() {
   server.registerTool(
     'calendar.updateEvent',
     {
-      description: 'Updates an existing event in a calendar.',
+      description:
+        'Updates an existing event in a calendar. Supports adding Google Meet links and Google Drive file attachments. When addGoogleMeet is true, the Meet URL will be in the response\'s hangoutLink field. Attachments fully replace any existing attachments (not appended).',
       inputSchema: {
         eventId: z.string().describe('The ID of the event to update.'),
         calendarId: z
