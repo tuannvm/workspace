@@ -70,6 +70,8 @@ I'll create this event:
 🕐 Time: 10:00 AM - 10:30 AM (EST)
 👥 Attendees: alice@example.com, bob@example.com
 📝 Description: Weekly team sync
+🎥 Google Meet: Will be generated
+📎 Attachments: Q1 Agenda (Google Doc)
 
 Should I create this event?
 ```
@@ -81,6 +83,10 @@ Should I create this event?
 - **`start` / `end`** — Must include timezone offset in ISO 8601 format (e.g.,
   `2025-01-15T10:00:00-05:00`)
 - **`attendees`** — Array of email addresses
+- **`addGoogleMeet`** — Set to `true` to automatically generate a Google Meet
+  link (available in response's `hangoutLink` field)
+- **`attachments`** — Array of Google Drive file attachments (fileUrl, title,
+  optional mimeType). Providing attachments fully replaces any existing attachments.
 - **`sendUpdates`** — Controls email notifications:
   - `"all"` — Notify all attendees (default when attendees are provided)
   - `"externalOnly"` — Only notify non-organization attendees
@@ -96,6 +102,12 @@ calendar.createEvent({
   end: { dateTime: "2025-01-15T10:30:00-05:00" },
   attendees: ["alice@example.com", "bob@example.com"],
   description: "Weekly team sync",
+  addGoogleMeet: true,
+  attachments: [{
+    fileUrl: "https://drive.google.com/file/d/abc123/edit",
+    title: "Q1 Agenda",
+    mimeType: "application/vnd.google-apps.document"
+  }],
   sendUpdates: "all"
 })
 ```
